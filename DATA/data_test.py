@@ -10,7 +10,7 @@ class Client:
     number_phone: str = 1119029320
     address: str = "ул. Джангара, 19, Элиста, Респ. Калмыкия, 358007"
     number_phone_friend: str = 1019029320
-    coupon: str = "MQ029DF"
+    coupon: str = "BEFITNEW"
     email: str = "test_email@gmail.com"
 @dataclass
 class ClientError:

@@ -12,6 +12,7 @@ class Mediator(Base):
         try:
             by, locator = self.type_find(d_locator, element)
             elements = self.get_all_elements(by, locator)
+            self.scroll_page(elements[0])
             print(f' elements = {elements}')
             for j in elements:
                 print(f' j = {j}')
@@ -20,34 +21,49 @@ class Mediator(Base):
         except TimeoutException:
             return False
 
-    def type_find(self, d_locator, element):
+    def type_find(self, d_locator, element) -> By and str or ValueError:
+        print(f'  d_locator = { d_locator, type ( d_locator)}')
         locator = d_locator.get(element)
         if locator:
             return locator.by, locator.locator
         else:
             raise ValueError(f"Локатор для элемента {element} не найден")
 
-    def select_box(self, d_locator:dict, element: str) -> bool:
+    def select_box(self, d_locator:dict, element: str, timeout = 2) -> bool:
         try:
+
             by, locator = self.type_find(d_locator, element)
-            self.click( by, locator)
+            print(f' by, locator = {by, locator}')
+            self.click( by, locator, timeout=timeout)
             return True
         except TimeoutException:
             print('не нажал')
             return False
 
-    def delete(self):
-        """ Deletes element from the page. """
-
-        element = '//*[@id="header"]/div[7]/div[2]/div[22]/div[2]/div[3]'
+    def delete(self, d_locator: dict) -> bool:
+        """ Удалить элемент со страницы """
         try:
-            self.click(By.XPATH, element)
+            #By.XPATH, '//*[@id="header"]/div[7]/div[2]/div[22]/div[2]'
+            element = self.find_element(d_locator.get("by"), d_locator.get("locator") )
+            self.driver.execute_script("arguments[0].remove()", element)
+            self.click_blunk()
             return True
         except TimeoutException:
-            print('не нажал')
+            print('не удалил')
             return False
         # Delete element:
 
+    def send_information (self, d_locator:dict, element: str, what_send: str, timeout = 3) -> bool:
+        try:
+            print(f' what_send = {what_send}')
+            by, locator = self.type_find(d_locator, element)
+            element = self.find_element(by, locator)
+            element.send_keys(what_send)
+            time.sleep(timeout)
+            return True
+        except TimeoutException:
+            print('объект не найден')
+            return False
 
 
 
