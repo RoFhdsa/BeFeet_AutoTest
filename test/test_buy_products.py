@@ -1,28 +1,31 @@
-
-import time
-import random
-
-import pytest
 import allure
-# from src.Products.ProductSQL import ProductSQL
-# from src.Products.product_data import Products
+import pytest
+
+from DATA.data_test import Client
+
 
 @allure.feature("Проверка продуктовой страницы")
 class TestProductPage:
     @allure.title("Тест проверки приобритения программы")
     @allure.description("Проверка приобритения программы")
     @pytest.mark.parametrize(
-        "type_program, time_use_program, is_weekend",
+        "type_program, period_use_program, is_weekend,"
+        "is_coupon, coupon, number_phone,"
+        "is_friend, number_phone_friend",
         [
-            ("Заказать Extralight", "4 недели", True),
-             # , "secret_sauce", False),
-
+            ("Заказать Extralight", "4 недели", True,
+             True, Client.coupon, Client.number_phone,
+             True, Client.number_phone_friend),
         ]
     )
-    def test_check_products(self, main_page, type_program, time_use_program, is_weekend):
+    def test_check_products(self, main_page, type_program, period_use_program, is_weekend,
+                            is_coupon, coupon, number_phone,
+                            is_friend, number_phone_friend):
+
         main_page.buy_products(type_program=type_program,
-                               time_use_program=time_use_program,
-                               is_weekend=is_weekend)
+                               period_use_program=period_use_program, is_weekend=is_weekend,
+                               is_coupon=is_coupon, coupon=coupon, number_phone=number_phone,
+                               is_friend =is_friend, number_phone_friend= number_phone_friend)
         pass
 
         #

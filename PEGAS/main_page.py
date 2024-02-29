@@ -1,70 +1,111 @@
 import time
-from dataclasses import dataclass
 
 import allure
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from DATA.data_web_find import MainPateLocator as mpl , Weekends as wk
+
+from DATA.data_web_find import (ProgramName as pn, Weekends as wk, PeriodUseProgrammL as pup,
+                                Spam as s, Coupon as c, Phone as ph, AdviceFriend as af, Checout as ch)
 from PEGAS.mediator import Mediator
+
 
 class MainPage(Mediator):
     """Предоставляет функционал для работы с главной страницей."""
-    def __init__(self,driver):
+
+    def __init__(self, driver):
         super().__init__(driver)
-        self.locators_mpl = mpl().locator_div
+        self.locator_s = s().locator_div
+        self.locators_mpl = pn().locator_div
+        self.locators_pup = pup().locator_div
+        self.delete_block = wk().delete_block
+        self.check_msg = wk().check_msg
         self.locators_wk = wk().locator_div
+        self.locator_cl = c().locator_div
+        self.locator_ph = ph().locator_div
+        self.locator_af = af().locator_div
+        self.locator_ch = ch().locator_div
 
+    def buy_products(self,
+                     type_program: str, period_use_program: str, is_weekend: bool,
+                     is_coupon: bool, coupon: str, number_phone: str,
+                     is_friend: bool, number_phone_friend: str
+                     ) -> str:
 
-    def buy_products (self,
-                      type_program: str,
-                      time_use_program: str,
-                      is_weekend: bool,
-                      # is_coupon: bool, coupon:str, number_phone, is_friend: bool,
-                      ) -> str:
+        # 0 wait spam information
+        try:
+            a_element = self.find_element(By.XPATH, '//div[@class="widget js-widget animation_slideLTR"]')
+            self.driver.execute_script("arguments[0].remove()", a_element)
+        except:
+            self.click_blunk()
+            self.click_blunk()
+            time.sleep(2)
+            print("колесо не нашёл")
 
         # 1 check_type_program
-        is_check_element = self.check_element(self.locators_mpl, type_program)
+        with allure.step(f"Проверка выбранной программы {type_program}"):
+            check_type_program = self.check_element(self.locators_mpl, type_program)
+            screenshot_product_page = self.create_screenshot(type_program)
+            allure.attach.file(screenshot_product_page, attachment_type=allure.attachment_type.PNG)
+
         # 2 choice_time_use_program
-        self.select_box(self.locators_mpl, time_use_program)
+        with allure.step(f"Проверка выбранного времени использования прогрммы {period_use_program}"):
+            choice_time_use_program = self.select_box(self.locators_pup, period_use_program)
+            screenshot_product_page = self.create_screenshot(period_use_program)
+            allure.attach.file(screenshot_product_page, attachment_type=allure.attachment_type.PNG)
 
         # 3 choice_is_weekend
         if is_weekend:
-            self.select_box(self.locators_wk, is_weekend)
-            time.sleep(3)
-            self.select_box(self.locators_wk, "Понятно")
+            with allure.step(f"Проверка выбра Исключить выходные прогрммы {type_program}"):
+                self.select_box(self.locators_wk, is_weekend)
+                self.check_element(self.check_msg, True)
+                screenshot_product_page = self.create_screenshot("выходные_исключить")
+                allure.attach.file(screenshot_product_page, attachment_type=allure.attachment_type.PNG)
             # рассмотреть вариант удаления всплывающего окна
-            # d = self.delete()
-            # print(f' d = {d}')
-            time.sleep(3)
-        # 4 choice_is_coupon
-        # 5 inpit_number_phone
+            # d = self.delete(self.delete_block)
+            choice_is_weekend = self.select_box(self.locators_wk, "It's clear")
+        # 4 input_number_phone
+        with allure.step(f"Проверка ввода номера телефона {number_phone}"):
+            input_number_phone = self.send_information(self.locator_ph, element=True, what_send=number_phone)
+            screenshot_product_page = self.create_screenshot({number_phone})
+            allure.attach.file(screenshot_product_page, attachment_type=allure.attachment_type.PNG)
+        # 5 choice_is_coupon
+        if is_coupon:
+            with allure.step(f"Проверка ввода купона {coupon}"):
+                self.select_box(self.locator_cl, element=is_coupon)
+                self.send_information(self.locator_cl, element="input_coupon", what_send=coupon)
+                choice_is_coupon = self.select_box(self.locator_cl, element="button_apply")
+                screenshot_product_page = self.create_screenshot({coupon})
+                allure.attach.file(screenshot_product_page, attachment_type=allure.attachment_type.PNG)
         # 6 choice_is_friend
+        if is_friend:
+            with allure.step(f"Проверка Befit мне рекомендовал друг"):
+                self.select_box(self.locator_af, element=is_friend)
+                choice_is_friend = self.send_information(self.locator_af, element="input_phone", what_send=number_phone_friend)
+                screenshot_product_page = self.create_screenshot({"друг_рекомендовал"})
+                allure.attach.file(screenshot_product_page, attachment_type=allure.attachment_type.PNG)
+        #7 checkout_order
+        with allure.step(f"оформить заказ прогрммы {type_program}"):
+            checkout_order = self.select_box(self.locator_ch, element="button_checkout", timeout=20)
+            time.sleep(20)
+            screenshot_product_page = self.create_screenshot({"оформить_программу"})
+            allure.attach.file(screenshot_product_page, attachment_type=allure.attachment_type.PNG)
+        return ResultCheck (check_type_program,choice_time_use_program,choice_is_weekend,input_number_phone,
+                            choice_is_coupon,choice_is_friend,checkout_order)
 
-        # names_products_choices = [row.get('name') for row in products_choices]
-        # self.add_product_to_basket (names_products_choices, pc.locator_xpath_products)
-        # # перейти в корзину, сверить продукт, ктоорый был заявлен с тем, который был куплен
-        # self.click(by=By.XPATH, locator='//*[@id="shopping_cart_container"]/a')
-        # product_page = self.get_products_basket(pb.locator_xpath_products)
+class ResultCheck:
 
-        #products = self.get_all_elements(By.CSS_SELECTOR, pc.locator_product)
-        #product_choice = [element for element in products if element.text.lower() == product_name['name'].lower()][0]
-        #print(f' product_choice = {product_choice, type (product_choice), product_choice.text}')
-        # button = product_choice.find_element(By.XPATH,
-        #button = self.click(By.CSS_SELECTOR,
-         #                                      'button.btn.btn_primary.btn_small.btn_inventory')
+    def __init__(self, check_type_program: bool, choice_time_use_program: bool, choice_is_weekend: bool,
+                 input_number_phone: bool, choice_is_coupon: bool, choice_is_friend: bool,checkout_order: bool):
+        self.check_type_program = check_type_program
+        self.choice_time_use_program = choice_time_use_program
+        self.choice_is_weekend = choice_is_weekend
+        self.input_number_phone = input_number_phone
+        self.choice_is_coupon = choice_is_coupon
+        self.choice_is_friend = choice_is_friend
+        self.checkout_order = checkout_order
 
-        #print(f' button = {button}')
-        # выбрать 4 проудкта и добавив их в корзину
-        # проверить, что 4 проудкта выбраны и добавлены в корзину (значок корзины)
-        # перейти в корзину
-        # проверить, что выбраны те продукты, которые были куплены
-        # оформить заказ
-        # дойти до конечной формы
-        # product_page = self.get_products_with_page_catalogs()
-        # screenshot = self.create_screenshot(username)
-        # allure.attach.file(screenshot, attachment_type=allure.attachment_type.PNG)
-        #
-        # allure.attach.file(screenshot, attachment_type=allure.attachment_type.PNG)
-        # print(f'product_page ={product_page}')
-        # return product_page
+    def __del__(self):
         pass
+
+
+
+
