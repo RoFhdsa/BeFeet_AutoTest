@@ -13,7 +13,7 @@ class ElementLocator:
 @dataclass
 class ProgramName:
     locator_div: dict = field(default_factory=lambda:
-    {'Заказать Extralight': ElementLocator(name="Extralight",
+    {'Extralight': ElementLocator(name="Extralight",
                                            by=By.XPATH,
                                            locator='//*[@id="order"]/div/div/div[1]/div[1]/div[1]')})
 
@@ -82,7 +82,10 @@ class Coupon:
                           locator='//*[@id="order"]/div/div/div[2]/div[4]/div/label/div/div[2]'),
     "button_apply": ElementLocator(name="кнопка применить",
                           by=By.XPATH,
-                          locator='//*[@id="order"]/div/div/div[2]/div[5]/div/div[3]/div')
+                          locator='//*[@id="order"]/div/div/div[2]/div[5]/div/div[3]/div'),
+    "ErrorCoupon": ElementLocator(name="кнопка не подходит",
+                          by=By.XPATH,
+                          locator='//*[@id="order"]/div/div/div[2]/div[5]/div/div[1]/div'),
      })
 
 @dataclass
@@ -90,8 +93,14 @@ class Phone:
     locator_div: dict = field(default_factory=lambda:
     {True: ElementLocator(name="телефон",
                           by=By.XPATH,
-                          locator='//*[@id="order"]/div/div/div[2]/div[6]/div/input')})
-                          # locator='//*[@id="order"]/div/div/div[2]/div[5]/div/div[2]/input')})
+                          locator='//*[@id="order"]/div/div/div[2]/div[6]/div/input'),
+     "ErrorPhone": ElementLocator(name="не корректный телефон",
+                          by=By.XPATH,
+                          locator='//*[@id="order"]/div/div/div[2]/div[6]/div/div'),
+     "ErrorPhone_with_coupon": ElementLocator(name="не корректный телефон",
+                                  by=By.XPATH,
+                                  locator='//*[@id="order"]/div/div/div[2]/div[5]/div/div[2]/div')
+     })
 @dataclass
 class AdviceFriend:
     locator_div: dict = field(default_factory=lambda:
@@ -100,7 +109,10 @@ class AdviceFriend:
                           locator='//*[@id="order"]/div/div/div[2]/div[7]/div/div/label/div/div[2]'),
      "input_phone": ElementLocator(name="поле ввода номера телефона",
                           by=By.XPATH,
-                          locator='//*[@id="order"]/div/div/div[2]/div[8]/div/div/input')
+                          locator='//*[@id="order"]/div/div/div[2]/div[8]/div/div/input'),
+     "ErrorPhoneFriend": ElementLocator(name="поле ввода номера телефона",
+                          by=By.XPATH,
+                          locator='//*[@id="order"]/div/div/div[2]/div[8]/div/div/div')
      })
 
 @dataclass
