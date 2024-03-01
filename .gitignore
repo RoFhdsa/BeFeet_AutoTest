@@ -289,7 +289,7 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
-
+*.txt
 # Environments
 .env
 .venv
@@ -332,9 +332,7 @@ cython_debug/
 
 !/test/allure-results/
 *.png
-*.png
-*.png
-*.png
-*.png
-*.png
-*.png
+*.json
+!/test/geckodriver.exe
+!/test/geckodriver.exe
+/test/geckodriver.exe
